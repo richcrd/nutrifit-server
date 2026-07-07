@@ -93,7 +93,7 @@ def create_rules(db):
             priority=1,
             active=True,
         )
-        regla_bajo_peso.recomendaciones = [recomendacion_proteina, recomendacion_nutricionista]
+        regla_bajo_peso.recommendations = [recomendacion_proteina, recomendacion_nutricionista]
         db.add(regla_bajo_peso)
 
     regla_normal = db.query(Rule).filter(Rule.name == "IMC normal").first()
@@ -108,7 +108,7 @@ def create_rules(db):
             priority=1,
             active=True,
         )
-        regla_normal.recomendaciones = [recomendacion_mantener, recomendacion_frutas]
+        regla_normal.recommendations = [recomendacion_mantener, recomendacion_frutas]
         db.add(regla_normal)
 
     regla_sobrepeso = db.query(Rule).filter(Rule.name == "IMC sobrepeso").first()
@@ -123,7 +123,7 @@ def create_rules(db):
             priority=1,
             active=True,
         )
-        regla_sobrepeso.recomendaciones = [recomendacion_caminar, recomendacion_reducir_calorias]
+        regla_sobrepeso.recommendations = [recomendacion_caminar, recomendacion_reducir_calorias]
         db.add(regla_sobrepeso)
 
     regla_obesidad = db.query(Rule).filter(Rule.name == "IMC obesidad").first()
@@ -138,7 +138,7 @@ def create_rules(db):
             priority=1,
             active=True,
         )
-        regla_obesidad.recomendaciones = [recomendacion_caminar, recomendacion_reducir_calorias, recomendacion_evitar_azucar]
+        regla_obesidad.recommendations = [recomendacion_caminar, recomendacion_reducir_calorias, recomendacion_evitar_azucar]
         db.add(regla_obesidad)
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ from app.core.security import hash_password, verify_password, create_access_toke
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
-def register_user(data: UserCreate, db: Session = Depends(get_db())):
+def register_user(data: UserCreate, db: Session = Depends(get_db)):
   existing_user = get_by_email(db, data.email)
 
   if existing_user is not None:

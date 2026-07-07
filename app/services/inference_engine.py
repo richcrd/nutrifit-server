@@ -34,7 +34,7 @@ def evaluate_rules(rules, calculated_values):
     matches = matches_rule(evaluated_value, rule.operator, rule.min_value, rule.max_value)
 
     if matches:
-      diagnostic_found = rule.found
+      diagnostic_found = rule.diagnostic
       recommendations_found = rule.recommendations
       break
 

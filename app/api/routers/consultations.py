@@ -13,14 +13,14 @@ router = APIRouter(prefix="/consultations", tags=["consultations"])
 def crear_consulta_nutricional(
     data: ConsultationCreate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user()),
+    current_user = Depends(get_current_user),
 ):
     result = process_consultation(
         db=db,
         weight_kg=data.weight_kg,
         height_cm=data.height_cm,
         age=data.age,
-        genre=current_user.sexo,
+        genre=current_user.genre,
     )
 
     if result["diagnostic"] is None:
@@ -38,7 +38,7 @@ def crear_consulta_nutricional(
         physic_activity_id=data.physic_activity_id,
         goal_id=data.goal_id,
         imc_calculated=result["imc_calculated"],
-        recommended_water_ml=result["recommended_water_imc"],
+        recommended_water_ml=result["recommended_water_ml"],
         diagnostic_id=result["diagnostic"].id,
         recommendations=result["recommendations"],
     )
@@ -49,6 +49,6 @@ def crear_consulta_nutricional(
 @router.get("", response_model=list[ConsultationOut])
 def obtener_mi_historial(
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user()),
+    current_user = Depends(get_current_user),
 ):
     return get_history_by_user(db, current_user.id)
