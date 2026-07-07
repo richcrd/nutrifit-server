@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.exceptions import DiagnosticNotFound
 from app.db.sessions import get_db
 from app.api.deps import get_current_user
 from app.schemas.consultation import ConsultationCreate, ConsultationOut
@@ -24,10 +25,7 @@ def crear_consulta_nutricional(
     )
 
     if result["diagnostic"] is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="No se encontro un diagnostico para los datos proporcionados",
-        )
+        raise DiagnosticNotFound()
 
     saved_consultation = create_consultation(
         db=db,

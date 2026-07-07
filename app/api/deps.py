@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
+from app.core.exceptions import UserNotFound
 from app.db.sessions import get_db
 from app.core.security import decode_token
 from app.respositories.user import get_by_id
@@ -26,6 +27,6 @@ def get_current_user(
     user = get_by_id(db, int(user_id_str))
 
     if user is None:
-      raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no encontrado")
+      raise UserNotFound()
 
     return user
