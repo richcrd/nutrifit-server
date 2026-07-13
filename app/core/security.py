@@ -5,6 +5,8 @@ from passlib.context import CryptContext
 from sqlalchemy.util import deprecated
 
 from app.core.config import settings
+import secrets
+import hashlib
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -26,3 +28,10 @@ def decode_token(token: str):
     return payload
   except JWTError:
     return None
+  
+def generate_refresh_token() -> str:
+  return secrets.token_urlsafe(64)
+
+def hash_refresh_token(token: str) -> str:
+  return hashlib.sha256(token.encode()).hexdigest()
+

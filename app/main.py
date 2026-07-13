@@ -10,6 +10,7 @@ from app.core.exceptions import (
     UserNotFound,
     InvalidCredentials,
     EmailRegistered,
+    InvalidRefreshToken,
 )
 
 app = FastAPI(title="Nutri Fit")
@@ -36,6 +37,8 @@ def get_http_code(error: DomainError) -> int:
         return 401
     elif isinstance(error, EmailRegistered):
         return 400
+    elif isinstance(error, InvalidRefreshToken):
+        return 401
     else:
         return 500
 

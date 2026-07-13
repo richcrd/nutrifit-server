@@ -18,3 +18,7 @@ class InvalidCredentials(DomainError):
 class EmailRegistered(DomainError):
   def __init__(self):
     super().__init__("El email ya esta registrado")
+
+class InvalidRefreshToken(DomainError):
+  def __init__(self):
+    super().__init__("Refresh token invalido o expirado")
