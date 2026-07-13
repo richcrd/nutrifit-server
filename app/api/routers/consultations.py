@@ -5,10 +5,16 @@ from app.core.exceptions import DiagnosticNotFound
 from app.db.sessions import get_db
 from app.api.deps import get_current_user
 from app.schemas.consultation import ConsultationCreate, ConsultationOut
+from app.schemas.question import QuestionOut
 from app.services.inference_engine import process_consultation
+from app.services.questionnaire import get_questionnaire
 from app.respositories.consultation_repository import create_consultation, get_history_by_user
 
 router = APIRouter(prefix="/consultations", tags=["consultations"])
+
+@router.get("/questions", response_model=list[QuestionOut])
+def get_questions_consultation(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    return get_questionnaire(db)
 
 @router.post("", response_model=ConsultationOut, status_code=status.HTTP_201_CREATED)
 def crear_consulta_nutricional(

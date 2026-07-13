@@ -2,6 +2,7 @@ from app.db.sessions import SessionLocal
 from app.models.catalog import Diagnostic, PhysicActivity, Goal
 from app.models.recommendation import Recommendation
 from app.models.rule import Rule
+from app.models.question import Question
 
 def seed():
     db = SessionLocal()
@@ -12,6 +13,7 @@ def seed():
         create_goals(db)
         create_recommendations(db)
         create_rules(db)
+        create_questions(db)
 
         db.commit()
         print("Seed completed successfully")
@@ -140,6 +142,21 @@ def create_rules(db):
         )
         regla_obesidad.recommendations = [recomendacion_caminar, recomendacion_reducir_calorias, recomendacion_evitar_azucar]
         db.add(regla_obesidad)
+
+def create_questions(db):
+    questions = [
+        {"field": "weight_kg", "label": "¿Cuál es tu peso actual (kg)?", "type": "number", "catalog_source": None, "required": True, "order_index": 1},
+        {"field": "height_cm", "label": "¿Cuál es tu estatura (cm)?", "type": "number", "catalog_source": None, "required": True, "order_index": 2},
+        {"field": "age", "label": "¿Cuál es tu edad?", "type": "number", "catalog_source": None, "required": True, "order_index": 3},
+        {"field": "physic_activity_id", "label": "¿Cómo describirías tu actividad física?", "type": "single_select", "catalog_source": "physic_activity", "required": False, "order_index": 4},
+        {"field": "goal_id", "label": "¿Cuál es tu objetivo?", "type": "single_select", "catalog_source": "goal", "required": False, "order_index": 5},
+    ]
+
+    for item in questions:
+        exists = db.query(Question).filter(Question.field == item["field"]).first()
+        if exists is None:
+            db.add(Question(**item))
+
 
 if __name__ == "__main__":
     seed()
