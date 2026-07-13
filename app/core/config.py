@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"
     jwt_expiration_minutes: int = 60 * 24
+    jwt_refresh_expiration_days: int = 7
     cors_origin: str = ""
 
     model_config = SettingsConfigDict(
