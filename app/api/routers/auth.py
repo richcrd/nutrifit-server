@@ -9,6 +9,7 @@ from app.schemas.auth import TokenPair, RefreshRequest
 from app.respositories.user import get_by_email, create_user
 from app.respositories.refresh_token import create_refresh_token, get_by_hash, revoke, is_valid
 from app.core.security import hash_password, verify_password, create_access_token, generate_refresh_token, hash_refresh_token
+from app.api.response import success_response
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -27,7 +28,7 @@ def issue_token_pair(db: Session, user_id: int) -> TokenPair:
 
   return TokenPair(access_token=access_token, refresh_token=refresh_token)
 
-@router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+@router.post("/register", status_code=status.HTTP_201_CREATED)
 def register_user(data: UserCreate, db: Session = Depends(get_db)):
   existing_user = get_by_email(db, data.email)
 
@@ -44,7 +45,11 @@ def register_user(data: UserCreate, db: Session = Depends(get_db)):
     genre=data.genre
   )
 
-  return new_user
+  return success_response(
+    data=UserOut.model_validate(new_user).model_dump(),
+    message="Usuario registrado exitosamente",
+    code=status.HTTP_201_CREATED,
+  )
 
 @router.post("/login")
 def login(data: UserLogin, db: Session = Depends(get_db)):
@@ -58,9 +63,13 @@ def login(data: UserLogin, db: Session = Depends(get_db)):
   if not valid_password:
     raise InvalidCredentials()
 
-  return issue_token_pair(db, user.id)
+  tokens = issue_token_pair(db, user.id)
+  return success_response(
+    data=tokens.model_dump(),
+    message="Inicio de sesión exitoso",
+  )
 
-@router.post("/refresh", response_model=TokenPair)
+@router.post("/refresh")
 def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
   token_hash = hash_refresh_token(data.refresh_token)
   stored_token = get_by_hash(db, token_hash)
@@ -70,7 +79,11 @@ def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
   
   revoke(db, stored_token)
 
-  return issue_token_pair(db, stored_token.user_id)
+  tokens = issue_token_pair(db, stored_token.user_id)
+  return success_response(
+    data=tokens.model_dump(),
+    message="Token renovado exitosamente",
+  )
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(data: RefreshRequest, db: Session = Depends(get_db)):
@@ -79,4 +92,3 @@ def logout(data: RefreshRequest, db: Session = Depends(get_db)):
 
   if stored_token is not None:
     revoke(db, stored_token)
-

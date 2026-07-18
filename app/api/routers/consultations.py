@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import DiagnosticNotFound
@@ -9,14 +9,19 @@ from app.schemas.question import QuestionOut
 from app.services.inference_engine import process_consultation
 from app.services.questionnaire import get_questionnaire
 from app.respositories.consultation_repository import create_consultation, get_history_by_user
+from app.api.response import success_response
 
 router = APIRouter(prefix="/consultations", tags=["consultations"])
 
-@router.get("/questions", response_model=list[QuestionOut])
+@router.get("/questions")
 def get_questions_consultation(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    return get_questionnaire(db)
+    questions = get_questionnaire(db)
+    return success_response(
+        data=[QuestionOut.model_validate(q).model_dump() for q in questions],
+        message="Preguntas obtenidas correctamente",
+    )
 
-@router.post("", response_model=ConsultationOut, status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 def crear_consulta_nutricional(
     data: ConsultationCreate,
     db: Session = Depends(get_db),
@@ -47,12 +52,20 @@ def crear_consulta_nutricional(
         recommendations=result["recommendations"],
     )
 
-    return saved_consultation
+    return success_response(
+        data=ConsultationOut.model_validate(saved_consultation).model_dump(),
+        message="Consulta nutricional creada exitosamente",
+        code=status.HTTP_201_CREATED,
+    )
 
 
-@router.get("", response_model=list[ConsultationOut])
+@router.get("")
 def obtener_mi_historial(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
-    return get_history_by_user(db, current_user.id)
+    history = get_history_by_user(db, current_user.id)
+    return success_response(
+        data=[ConsultationOut.model_validate(c).model_dump() for c in history],
+        message="Historial obtenido correctamente",
+    )

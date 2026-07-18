@@ -1,8 +1,10 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.routers import auth, consultations, catalogs
+from app.api.response import success_response
 from app.core.config import settings
 from app.core.exceptions import (
     DomainError,
@@ -26,7 +28,17 @@ app.add_middleware(
 @app.exception_handler(DomainError)
 def handle_domain_error(request: Request, error: DomainError):
     http_code = get_http_code(error)
-    return JSONResponse(status_code=http_code, content={"detail": error.message})
+    return JSONResponse(
+        status_code=http_code,
+        content={"code": http_code, "message": error.message, "response": None},
+    )
+
+@app.exception_handler(StarletteHTTPException)
+def handle_http_exception(request: Request, error: StarletteHTTPException):
+    return JSONResponse(
+        status_code=error.status_code,
+        content={"code": error.status_code, "message": str(error.detail), "response": None},
+    )
 
 def get_http_code(error: DomainError) -> int:
     if isinstance(error, DiagnosticNotFound):
@@ -45,7 +57,10 @@ def get_http_code(error: DomainError) -> int:
 @app.exception_handler(Exception)
 def manejar_error_inesperado(request: Request, error: Exception):
     print("Error inesperado:", error)
-    return JSONResponse(status_code=500, content={"detail": "Ocurrio un error inesperado en el servidor"})
+    return JSONResponse(
+        status_code=500,
+        content={"code": 500, "message": "Ocurrio un error inesperado en el servidor", "response": None},
+    )
 
 
 app.include_router(auth.router)
@@ -54,4 +69,4 @@ app.include_router(catalogs.router)
 
 @app.get("/health")
 def read_root():
-    return {"status": "ok"}
+    return success_response(data={"status": "ok"}, message="Servidor operativo")
