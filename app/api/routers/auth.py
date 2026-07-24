@@ -10,6 +10,7 @@ from app.respositories.user import get_by_email, create_user
 from app.respositories.refresh_token import create_refresh_token, get_by_hash, revoke, is_valid
 from app.core.security import hash_password, verify_password, create_access_token, generate_refresh_token, hash_refresh_token
 from app.api.response import success_response
+from app.api.deps import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -92,3 +93,11 @@ def logout(data: RefreshRequest, db: Session = Depends(get_db)):
 
   if stored_token is not None:
     revoke(db, stored_token)
+
+@router.get("/me")
+def get_me(current_users = Depends(get_current_user)):
+  return success_response(
+    data=UserOut.model_validate(current_users).model_dump(),
+    message="Información del usuario",
+  )
+
